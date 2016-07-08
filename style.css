@@ -1,0 +1,24 @@
+body {
+}
+
+#acceleration {
+    width: 8em;
+/*    display: none; */
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    border-radius: 5px 0px 5px 5px;
+    border: 1px solid;
+    padding: 5px;
+    background: #ccc;
+    padding-right: 15px;
+}
+
+#acceleration td {
+    width: 2em;
+    height: 2em;
+    text-align: center;
+    vertical-align: middle;
+    background: gold;
+    border-radius: 3px;
+}

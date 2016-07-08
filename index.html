@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Vector Racing</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="script.js"></script>
+  </head>
+  <body>
+    <div id="track">
+      <canvas id="cvs"></canvas>
+    </div>
+    <div id="acceleration">
+      <table id="acceltbl">
+	<tr>
+	  <td id="playerName" colspan="3">
+	    Player One
+	  </td>
+	</tr>
+	<tr>
+	  <td class="accelerate" data-x="-1" data-y="1"><span>&#x2196;</span></td>
+	  <td class="accelerate" data-x="0" data-y="1"><span>&#x2191;</span></td>
+	  <td class="accelerate" data-x="1" data-y="1"><span>&#x2197;</span></td>
+	</tr>
+	<tr>
+	  <td class="accelerate" data-x="0" data-y="0"><span>&#x2190;</span></td>
+	  <td class="accelerate" data-x="0" data-y="0"><span></span></td>
+	  <td class="accelerate" data-x="1" data-y="0"><span>&#x2192;</span></td>
+	</tr>
+	<tr>
+	  <td class="accelerate" data-x="-1" data-y="-1"><span>&#x2199;</span></td>
+	  <td class="accelerate" data-x="0" data-y="-1"><span>&#x2193;</span></td>
+	  <td class="accelerate" data-x="1" data-y="-1"><span>&#x2198;</span></td>
+	</tr>
+      </table>
+    </div>
+  </body>
+</html>
