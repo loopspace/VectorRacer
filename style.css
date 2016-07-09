@@ -1,6 +1,15 @@
 body {
 }
 
+#track {
+    overflow: hidden;
+    position: relative;
+}
+
+#cvs {
+    position: absolute; 
+}
+
 #acceleration {
     width: 8em;
 /*    display: none; */
@@ -21,4 +30,13 @@ body {
     vertical-align: middle;
     background: gold;
     border-radius: 3px;
+}
+
+#acceleration span {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none; 
 }
