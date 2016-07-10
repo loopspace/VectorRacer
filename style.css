@@ -4,15 +4,28 @@ body {
 #track {
     overflow: hidden;
     position: relative;
+    display: none;
 }
 
 #cvs {
     position: absolute; 
 }
 
+#define {
+    display: none;
+    position: fixed;
+    right: 0px;
+    top: 0px;
+    border-radius: 5px 0px 5px 5px;
+    border: 1px solid;
+    padding: 5px;
+    background: #ccc;
+    padding-right: 15px;
+}
+
 #acceleration {
     width: 8em;
-/*    display: none; */
+    display: none;
     position: fixed;
     right: 0px;
     top: 0px;
@@ -39,4 +52,13 @@ body {
     -moz-user-select: none;      /* Firefox */
     -ms-user-select: none;       /* Internet Explorer/Edge */
     user-select: none; 
+}
+
+#winners {
+    display: none;
+    position: absolute;
+    background: #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 200%;
 }

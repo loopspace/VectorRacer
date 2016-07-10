@@ -7,8 +7,41 @@
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
+    <div id="setup">
+    <form id="setupForm">
+      <h3>Setup</h3>
+      <table id="setupTable">
+	<tr>
+	  <td>Initial width:</td><td><input type="text" id="gridWidth"
+	  value="20"></td>
+	</tr>
+	<tr>
+	  <td>Initial height:</td><td><input type="text"
+	  id="gridHeight" value="20"></td>
+	</tr>
+	<tr>
+	  <td>Fixed size:</td><td><input disabled="disabled" type="checkbox" id="gridFixed"></td>
+	</tr>
+	<tr>
+	  <td>Number of players:</td><td><input type="text"
+						id="numPlayers"></td>
+	</tr>
+	<tbody id="playerNames">
+	</tbody>
+	<tr>
+	  <td></td><td><button id="makeGrid"
+	  type="button">Generate grid</button></td>
+	</tr>
+      </table>
+    </form>
+    </div>
     <div id="track">
       <canvas id="cvs"></canvas>
+    </div>
+    <div id="define">
+      <form id="defineForm">
+	<button id="startGame" type="button">Start game</button>
+      </form>
     </div>
     <div id="acceleration">
       <table id="acceltbl">
@@ -33,6 +66,8 @@
 	  <td class="accelerate" data-x="1" data-y="-1"><span>&#x2198;</span></td>
 	</tr>
       </table>
+    </div>
+    <div id="winners">
     </div>
   </body>
 </html>
