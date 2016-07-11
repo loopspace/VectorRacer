@@ -23,8 +23,12 @@ body {
     padding-right: 15px;
 }
 
+#acceltbl {
+    display: none;
+}
+
 #acceleration {
-    width: 8em;
+    width: 18em;
     display: none;
     position: fixed;
     right: 0px;
@@ -36,13 +40,21 @@ body {
     padding-right: 15px;
 }
 
+#acceleration table {
+    float: left;
+}
+
 #acceleration td {
     width: 2em;
     height: 2em;
     text-align: center;
     vertical-align: middle;
-    background: gold;
+/*    background: gold; */
     border-radius: 3px;
+}
+
+.accelerate {
+    border-style: outset;
 }
 
 #acceleration span {
@@ -54,11 +66,27 @@ body {
     user-select: none; 
 }
 
-#winners {
+#messages {
     display: none;
     position: absolute;
     background: #ccc;
     border-radius: 5px;
     padding: 5px;
     font-size: 200%;
+}
+
+.playerSpot {
+    padding-left: 1em;
+    border-radius: .5em;
+}
+
+#turnform {
+    clear: both;
+    text-align: center;
+}
+
+#turnform button {
+    font-size: 100%;
+    margin-top: 1em;
+    margin-left: auto;
 }

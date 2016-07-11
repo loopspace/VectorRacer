@@ -8,29 +8,23 @@
   </head>
   <body>
     <div id="setup">
-    <form id="setupForm">
-      <h3>Setup</h3>
+      <form id="form">
+      </form>
+      <h3>Player Setup</h3>
       <table id="setupTable">
 	<tr>
-	  <td>Initial width:</td><td><input type="text" id="gridWidth"
-	  value="20"></td>
-	</tr>
-	<tr>
-	  <td>Initial height:</td><td><input type="text"
-	  id="gridHeight" value="20"></td>
-	</tr>
-	<tr>
-	  <td>Fixed size:</td><td><input disabled="disabled" type="checkbox" id="gridFixed"></td>
-	</tr>
-	<tr>
-	  <td>Number of players:</td><td><input type="text"
+	  <td>Number of players:</td><td><input form="form" type="text"
 						id="numPlayers"></td>
 	</tr>
 	<tbody id="playerNames">
+	  <tr>
+	    <td>Player 1's name:</td><td><input form="form" type="text"
+						id="playerName1"></td>
+	    </tr>
 	</tbody>
 	<tr>
-	  <td></td><td><button id="makeGrid"
-	  type="button">Generate grid</button></td>
+	  <td></td><td><button form="form" id="makeGrid"
+	  type="button">Click to configure track</button></td>
 	</tr>
       </table>
     </form>
@@ -39,14 +33,47 @@
       <canvas id="cvs"></canvas>
     </div>
     <div id="define">
-      <form id="defineForm">
-	<button id="startGame" type="button">Start game</button>
-      </form>
+	<table>
+	  <tr>
+	    <td>Select a track</td>
+	    <td>
+	      <select form="form" id="tracks">
+	      </select>
+	    </td>
+	  </tr>
+	  <tr>
+	    <td colspan="2">Or define your own:</td>
+	  </tr>
+	  <tr>
+	    <td>Initial width:</td><td><input form="form" type="text" id="gridWidth"
+	  value="20"></td>
+	  </tr>
+	  <tr>
+	    <td>Initial height:</td><td><input form="form" type="text"
+	  id="gridHeight" value="20"></td>
+	  </tr>
+	  <tr>
+	    <td>Fixed size:</td><td><input form="form" type="checkbox" id="gridFixed"></td>
+	  </tr>
+	  <tr>
+	    <td colspan="2">
+	      Player colours
+	    </td>
+	  </tr>
+	  <tbody id="playerSpots">
+	  </tbody>
+	  <tr>
+	    <td></td>
+	    <td>
+	      <button form="form" id="startGame" type="button">Start game</button>
+	    </td>
+	  </tr>
+	</table>
     </div>
     <div id="acceleration">
       <table id="acceltbl">
 	<tr>
-	  <td id="playerName" colspan="3">
+	  <td colspan="3">
 	    Player One
 	  </td>
 	</tr>
@@ -56,8 +83,8 @@
 	  <td class="accelerate" data-x="1" data-y="1"><span>&#x2197;</span></td>
 	</tr>
 	<tr>
-	  <td class="accelerate" data-x="0" data-y="0"><span>&#x2190;</span></td>
-	  <td class="accelerate" data-x="0" data-y="0"><span></span></td>
+	  <td class="accelerate" data-x="-1" data-y="0"><span>&#x2190;</span></td>
+	  <td class="accelerate" data-x="0" data-y="0"><span>&#x25EF;</span></td>
 	  <td class="accelerate" data-x="1" data-y="0"><span>&#x2192;</span></td>
 	</tr>
 	<tr>
@@ -66,8 +93,13 @@
 	  <td class="accelerate" data-x="1" data-y="-1"><span>&#x2198;</span></td>
 	</tr>
       </table>
+      <div id="turnform">
+	<button type="button" form="form" id="turnbtn">Take turn</button>
+	<button type="button" form="form" id="resetbtn">Reset</button>
+	<button type="button" form="form" id="newbtn">New</button>
+      </div>
     </div>
-    <div id="winners">
+    <div id="messages">
     </div>
   </body>
 </html>
