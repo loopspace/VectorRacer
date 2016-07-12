@@ -4,13 +4,23 @@
     <meta charset="utf-8">
     <title>Vector Racing</title>
     <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript" src="player.js"></script>
+    <script type="text/javascript" src="track.js"></script>
     <script type="text/javascript" src="script.js"></script>
   </head>
   <body>
-    <div id="setup">
-      <form id="form">
-      </form>
+    <form id="form">
+    </form>
+    <div id="track">
+      <canvas id="cvs"></canvas>
+    </div>
+    <div id="setup" class="configure">
       <h3>Player Setup</h3>
+      <div id="setupinst">
+	Choose the number of players and then choose names for them
+	(any blank will be named "Player 1" and so on).
+	Click the button when finished. 
+      </div>
       <table id="setupTable">
 	<tr>
 	  <td>Number of players:</td><td><input form="form" type="text"
@@ -20,20 +30,21 @@
 	  <tr>
 	    <td>Player 1's name:</td><td><input form="form" type="text"
 						id="playerName1"></td>
-	    </tr>
+	  </tr>
 	</tbody>
 	<tr>
 	  <td></td><td><button form="form" id="makeGrid"
 	  type="button">Click to configure track</button></td>
 	</tr>
       </table>
-    </form>
     </div>
-    <div id="track">
-      <canvas id="cvs"></canvas>
-    </div>
-    <div id="define">
-	<table>
+    <div id="define" class="configure">
+      <h3>Track Setup</h3>
+      <div id="trackinst">
+	Choose from one of the predefined tracks or define your own.
+      </div>
+      <table id="trackTable">
+	<tbody>
 	  <tr>
 	    <td>Select a track</td>
 	    <td>
@@ -42,19 +53,26 @@
 	    </td>
 	  </tr>
 	  <tr>
-	    <td colspan="2">Or define your own:</td>
+	    <td colspan="2" id="trackdesc"></td>
 	  </tr>
-	  <tr>
-	    <td>Initial width:</td><td><input form="form" type="text" id="gridWidth"
+	  </tbody>
+	  <tbody id="trackdef">
+	    <tr>
+	      <td>Initial width:</td><td><input form="form" type="text" id="gridWidth"
 	  value="20"></td>
-	  </tr>
-	  <tr>
-	    <td>Initial height:</td><td><input form="form" type="text"
-	  id="gridHeight" value="20"></td>
-	  </tr>
-	  <tr>
-	    <td>Fixed size:</td><td><input form="form" type="checkbox" id="gridFixed"></td>
-	  </tr>
+	    </tr>
+	    <tr>
+	      <td>Initial height:</td><td><input form="form" type="text"
+						 id="gridHeight" value="20"></td>
+	    </tr>
+	    <tr>
+	      <td>Fixed size:</td><td><input form="form" type="checkbox" id="gridFixed"></td>
+	    </tr>
+	    <tr>
+	      <td>Number of laps:</td><td><input form="form"
+	      type="text" id="laps" value="1"></td>
+	    </tr>
+	  </tbody>
 	  <tr>
 	    <td colspan="2">
 	      Player colours
@@ -71,6 +89,8 @@
 	</table>
     </div>
     <div id="acceleration">
+      <div id="accelctrls">
+      </div>
       <table id="acceltbl">
 	<tr>
 	  <td colspan="3">
@@ -94,7 +114,7 @@
 	</tr>
       </table>
       <div id="turnform">
-	<button type="button" form="form" id="turnbtn">Take turn</button>
+	<button type="button" form="form" id="turnbtn">Go</button>
 	<button type="button" form="form" id="resetbtn">Reset</button>
 	<button type="button" form="form" id="newbtn">New</button>
       </div>

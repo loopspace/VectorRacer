@@ -11,11 +11,10 @@ var numbers = [
 var coords;
 var ismoving;
 var movingPlayer = null;
-var ptsize = .3;
 var state = 0;
 
 var tracks = [
-    {
+    new Track({
 	name: 'First Past the Post',
 	description: 'Be the first to get over the finish line',
 	grid: {
@@ -23,8 +22,8 @@ var tracks = [
 	    ux: 20,
 	    ly: 0,
 	    uy: 20,
-	    fixed: true
 	},
+	fixed: true,
 	winner: function(p) {
 	    if (p.getY() >= 10) {
 		return true;
@@ -37,8 +36,8 @@ var tracks = [
 	},
 	markers: [{x: 0, y: 10, inside: true}, {x: 20, y: 10, inside: false}],
 	modifiable: false
-    },
-    {
+    }),
+    new Track({
 	name: 'Rest at the Last',
 	description: 'Get to the finish line and stop there',
 	grid: {
@@ -46,8 +45,8 @@ var tracks = [
 	    ux: 20,
 	    ly: 0,
 	    uy: 20,
-	    fixed: true
 	},
+	fixed: true,
 	winner: function(p) {
 	    if (p.getY() == 10 && p.getVelocityX() == 0 && p.getVelocityY() == 0) {
 		return true;
@@ -60,44 +59,90 @@ var tracks = [
 	},
 	markers: [{x: 0, y: 10, inside: true}, {x: 20, y: 10, inside: false}],
 	modifiable: false
-    },
-    {
+    }),
+    new Track({
 	name: 'Do a Lap',
-	description: 'Go round the marker once',
+	description: 'Go round the blue crosses once',
 	grid: {
 	    lx: 0,
 	    ux: 20,
 	    ly: 0,
 	    uy: 20,
-	    fixed: true
 	},
-	winner: checkTrack,
+	fixed: true,
 	starts: function(i,n) {
 	    return {x: 20 - n - 3 + i, y: 10}
 	},
-	markers: [{x: 10, y: 10, inside: true}],
+	laps: 1,
+	markers: [{x: 10, y: 9, inside: true},{x: 10, y: 11, inside: true}],
 	modifiable: false
-    },
-    {
-	name: 'Define your own',
-	description: 'Define your own track',
+    }),
+    new Track({
+	name: 'Hit the target',
+	description: 'Get to the target',
 	grid: {
 	    lx: 0,
 	    ux: 20,
 	    ly: 0,
 	    uy: 20,
-	    fixed: true
 	},
-	winner: checkTrack,
+	fixed: true,
+	starts: function(i,n) {
+	    return {x: 20 - n - 3 + i, y: 1}
+	},
+	laps: 1,
+	markers: [{x: 3, y: 17, inside: true}],
+	winner: function(p) {
+	    if (p.getX() == 3 && p.getY() == 17) {
+		return true;
+	    } else {
+		return false;
+	    }
+	},
+	modifiable: false
+    }),
+    new Track({
+	name: 'Stop on a dime',
+	description: 'Get to the target and stop there',
+	grid: {
+	    lx: 0,
+	    ux: 20,
+	    ly: 0,
+	    uy: 20,
+	},
+	fixed: true,
+	starts: function(i,n) {
+	    return {x: 20 - n - 3 + i, y: 1}
+	},
+	laps: 1,
+	markers: [{x: 3, y: 17, inside: true}],
+	winner: function(p) {
+	    if (p.getX() == 3 && p.getY() == 17 && p.getVelocityX() == 0 && p.getVelocityY() == 0) {
+		return true;
+	    } else {
+		return false;
+	    }
+	},
+	modifiable: false
+    }),
+    new Track({
+	name: 'Define your own',
+	description: 'Define your own track.  Set the width and height of the initial grid.  If the grid is "fixed", a player who hits the side restarts.  If not, the grid is effectively infinite.  Click on the grid to set markers: blue markers are inside the track, red are outside.  Drag the players\' starting positions to where you want them to be.',
+	grid: {
+	    lx: 0,
+	    ux: 20,
+	    ly: 0,
+	    uy: 20,
+	},
+	fixed: true,
 	starts: function(i,n) {
 	    return {x: 15 - n - 3 + i, y: 0}
 	},
+	laps: 1,
 	markers: [],
 	modifiable: true
-    }
+    })
 ];
-
-track = tracks[0];
 
 function init() {
     cvs = document.getElementById('cvs');
@@ -108,19 +153,23 @@ function init() {
     cvs.addEventListener('mouseup',domouseup);
     cvs.addEventListener('mouseout',domouseup);
 
+    var inst = document.getElementById('setupinst');
+    var istyle = window.getComputedStyle(document.getElementById('setupTable'));
+    inst.style.width = istyle.width;
+    
     var gw = document.getElementById('gridWidth');
     gw.addEventListener('change',function(e) {
-	track.grid.ux = parseInt(e.target.value);
+	track.setRight(e.target.value);
 	drawGame();
     });
     var gh = document.getElementById('gridHeight');
     gh.addEventListener('change',function(e) {
-	track.grid.uy = parseInt(e.target.value);
+	track.setTop(e.target.value);
 	drawGame();
     });
     var gf = document.getElementById('gridFixed');
     gf.addEventListener('click',function(e) {
-	track.grid.fixed = e.target.checked;
+	track.setFixed(e.target.checked);
     });
 
     gw.disabled = true;
@@ -154,7 +203,13 @@ function init() {
 	trackList.appendChild(opt);
     }
     trackList.addEventListener('change',setTrack);
+    setTrack(0);
+
+    setSize();
+    drawGame();
 }
+
+window.addEventListener('load',init,false);
 
 function getPlayers(n) {
     var n = Math.max(1,parseInt(n));
@@ -191,10 +246,6 @@ function definePlayers() {
     
     var phi = (Math.sqrt(5)-1)/2;
     var name;
-    if (track.grid.ux < ch.length + 6) {
-	track.grid.ux = ch.length + 6;
-    }
-    var spos = track.grid.ux - ch.length - 3;
     var td,col,tr,txt,bgcol;
     for (var i=0; i < ch.length; i++) {
 	name = ch[i].getElementsByTagName('input')[0].value;
@@ -203,7 +254,8 @@ function definePlayers() {
 	}
 	col = hsl(phi * i,1,.5);
 	bgcol = hsl(phi * i,1,.75);
-	players.push(new Player({x: spos + i, y: 0},col, bgcol, name));
+	players.push(new Player(col, bgcol, name));
+	
 	tr = document.createElement('tr');
 	td = document.createElement('td');
 	txt = document.createTextNode(name);
@@ -220,32 +272,27 @@ function definePlayers() {
 	tlist.appendChild(tr);
     }
     for (var i = 0; i < players.length; i++) {
-	players[i].setPosition(track.starts(i,players.length));
+	players[i].setPosition(track.getPosition(i,players.length));
     }
 
     setupGrid();
 }
 
 function setupGrid() {
-    var frm = document.getElementById("setup");
-    frm.style.display = "none";
-    var trk = document.getElementById("track");
-    trk.style.display = "block";
-    var def = document.getElementById("define");
-    def.style.display = "block";
-    var acc = document.getElementById("acceleration");
-    acc.style.display = "none";
+    showControls(1);
 
+    var inst = document.getElementById('trackinst');
+    var istyle = window.getComputedStyle(document.getElementById('trackTable'));
+    inst.style.width = istyle.width;
+
+    resetGame();
     state = 0;
-    
-    setSize();
-    drawGame();
 }
 
 function startGame() {
-    var def = document.getElementById("define");
-    def.style.display = "none";
-    var acc = document.getElementById("acceleration");
+    showControls(2);
+    var acc = document.getElementById("accelctrls");
+    acc.innerHTML = '';
     var acctbl = document.getElementById("acceltbl");
     var ctrltbl,tds;
     for (var i = 0; i < players.length; i++) {
@@ -258,17 +305,15 @@ function startGame() {
 	    tds[j].dataset.player = i;
 	}
 	tds[0].innerHTML = players[i].getName();
-	acc.insertBefore(ctrltbl,acceltbl);
+	acc.appendChild(ctrltbl);
     }
     var ctrls = document.querySelectorAll('.accelerate');
     for (var i = 0; i < ctrls.length; i++) {
 	ctrls[i].addEventListener('click',clickSquare);
     }
-    acc.style.display = "block";
     var tbtn = document.getElementById('turnbtn');
     tbtn.disabled = true;
-    drawTrack();
-    drawPlayers();
+    drawGame();
     state = 1;
 }
 
@@ -299,7 +344,7 @@ function takeTurn() {
 	players[i].update();
     }
     for (var i = 0; i < players.length; i++) {
-	players[i].drawTrajectory();
+	players[i].drawTrajectory(ctx,sqsize);
     }
     var acc = document.getElementById("acceleration");
     var tds = acc.querySelectorAll('.accelerate');
@@ -313,64 +358,40 @@ function takeTurn() {
 }
 
 function setTrack(e) {
-    var i = e.target.value;
+    var i;
+    if (e.target) {
+	i = e.target.value;
+    } else {
+	i = e;
+    }
     track = tracks[i];
     for (var j = 0; j < players.length; j++) {
-	players[j].setPosition(track.starts(j,players.length));
+	players[j].setPosition(track.getPosition(j,players.length));
     }
     var gw = document.getElementById('gridWidth');
-    gw.value = track.grid.ux;
+    gw.value = track.getWidth();
     var gh = document.getElementById('gridHeight');
-    gh.value = track.grid.uy;
+    gh.value = track.getHeight();
     var gf = document.getElementById('gridFixed');
-    gf.checked = track.grid.fixed;
+    gf.checked = track.isFixed();
+
+    var tdesc = document.getElementById('trackdesc');
+    tdesc.innerHTML = track.getDescription();
+    
+    var tf = document.getElementById('trackdef');
     if (track.modifiable) {
+	tf.style.display = "table-row-group";
 	gw.disabled = false;
 	gh.disabled = false;
 	gf.disabled = false;
     } else {
+	tf.style.display = "none";
 	gw.disabled = true;
 	gh.disabled = true;
 	gf.disabled = true;
     }
     drawGame();
 }
-
-function hsl(h,s,l) {
-    h = (h - Math.floor(h))*6;
-    var c = (1 - Math.abs(2*l-1))*s*255;
-    var m = l*255 - c/2;
-    var x = c*(1 - Math.abs(h%2 - 1));
-    var r,g,b;
-    if (h < 1) {
-	r = c + m;
-	g = x + m;
-	b = m;
-    } else if (h < 2) {
-	r = x + m;
-	g = c + m;
-	b = m;
-    } else if (h < 3) {
-	r = m;
-	g = c + m;
-	b = x + m;
-    } else if (h < 4) {
-	r = m;
-	g = x + m;
-	b = c + m;
-    } else if (h < 5) {
-	r = x + m;
-	g = m;
-	b = c + m;
-    } else {
-	r = c + m;
-	g = m;
-	b = x + m;
-    }
-    var s = 'rgb(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ')';
-    return s;
-}
-
 
 function setSize() {
     var w = window.innerWidth;
@@ -384,73 +405,21 @@ function setSize() {
     var dv = document.getElementById('track');
     dv.style.width = w + 'px';
     dv.style.height = h + 'px';
-    w /= track.grid.ux - track.grid.lx + 1;
-    h /= track.grid.uy - track.grid.ly + 1;
+    w /= track.getWidth() + 1;
+    h /= track.getHeight() + 1;
     sqsize = Math.min(w,h);
 }
 
-function drawGrid() {
-    var w = sqsize*(track.grid.ux - track.grid.lx + .5);
-    var h = sqsize*(track.grid.uy - track.grid.ly + .5);
-    ctx.strokeStyle = '#ccc';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (var i = 0; i <= track.grid.ux - track.grid.lx; i++) {
-	ctx.moveTo((i + .5)*sqsize,.5*sqsize);
-	ctx.lineTo((i + .5)*sqsize,h);
-    }
-    for (var i = 0; i <= track.grid.uy - track.grid.ly; i++) {
-	ctx.moveTo(.5*sqsize,(i + .5)*sqsize);
-	ctx.lineTo(w,(i + .5)*sqsize);
-    }
-    ctx.stroke();
-}
-
-function drawTrack() {
-    var c;
-    var cross = .2*sqsize;
-    ctx.strokeStyle = '#00f';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    for (var i = 0; i < track.markers.length; i++) {
-	if (track.markers[i].inside) {
-	    c = transformCoordinates(track.markers[i]);
-	    ctx.save();
-	    ctx.translate(c.x,c.y);
-	    ctx.moveTo(cross,cross);
-	    ctx.lineTo(-cross,-cross);
-	    ctx.moveTo(-cross,cross);
-	    ctx.lineTo(cross,-cross);
-	    ctx.restore();
-	}
-    }
-    ctx.stroke();
-    ctx.strokeStyle = '#f00';
-    ctx.beginPath();
-    for (var i = 0; i < track.markers.length; i++) {
-	if (!track.markers[i].inside) {
-	    c = transformCoordinates(track.markers[i]);
-	    ctx.save();
-	    ctx.translate(c.x,c.y);
-	    ctx.moveTo(cross,cross);
-	    ctx.lineTo(-cross,-cross);
-	    ctx.moveTo(-cross,cross);
-	    ctx.lineTo(cross,-cross);
-	    ctx.restore();
-	}
-    }
-    ctx.stroke();
-}
 
 function drawPlayers() {
     for (var i=0; i < players.length; i++) {
-	players[i].drawCar();
+	players[i].drawCar(ctx,sqsize);
     }
 }
 
 function redrawPlayers() {
     for (var i=0; i < players.length; i++) {
-	players[i].drawCar();
+	players[i].redraw(ctx,sqsize);
     }
 }
 
@@ -478,30 +447,6 @@ function checkWinners() {
     }
 }
 
-function checkTrack(player) {
-    var p,u,t,i,j,k;
-    p = player.getPath();
-    t = [];
-    for (k = 0; k < track.markers.length; k++) {
-	t.push(0);
-    }
-    for (j = 1; j < p.length; j++) {
-	for (k = 0; k < track.markers.length; k++) {
-	    if ( (p[j].y - track.markers[k].y) * (track.markers[k].y - p[j-1].y) > 0 || (track.markers[k].y == p[j].y && track.markers[k].y != p[j-1].y) ) {
-		u = (p[j].y - track.markers[k].y)/(p[j].y - p[j-1].y);
-		if ( (1 - u) * p[j].x + u * p[j-1].x > track.markers[k].x ) {
-		    t[k]++;
-		}
-	    }
-	}
-    }
-    for (k = 0; k < track.markers.length; k++) {
-	if ( (track.markers[k].inside && t[k]%2 == 0) || (!track.markers[k].inside && t[k]%2 == 1) ) {
-	    return false;
-	}
-    }
-    return true;
-}
 
 function setMessage(s) {
     var dv = document.getElementById('messages');
@@ -511,7 +456,7 @@ function setMessage(s) {
     var ww = window.innerWidth;
     var wh = window.innerHeight;
     dv.style.left = (ww/2 - parseFloat(style.width)/2) + 'px';
-    dv.style.top = (wh/2 - parseFloat(style.height)/2) + 'px';
+    dv.style.top = 100 + 'px';//(wh/2 - parseFloat(style.height)/2) + 'px';
     window.setTimeout(clearMessage,5000);
 }
 
@@ -530,92 +475,30 @@ function resetGame() {
 
 function drawGame() {
     clear(ctx);
-    drawGrid();
-    drawTrack();
+    track.draw(ctx,sqsize);
     drawPlayers();
 }
 
 function redrawGame() {
     clear(ctx);
-    drawGrid();
-    drawTrack();
+    track.draw(ctx,sqsize);
     redrawPlayers();
 }
 
 function checkSides() {
-    if (track.grid.fixed) {
-	checkSidesFixed();
-    } else {
-	checkSidesResize();
-    }
-}
-
-function checkSidesFixed() {
-    var redo;
-    for (var i = 0; i < players.length; i++) {
-	if (
-	    (players[i].getX() < track.grid.lx)
-		||
-		(players[i].getX() > track.grid.ux)
-		||
-	    (players[i].getY() < track.grid.ly)
-		||
-		(players[i].getY() > track.grid.uy)
-	) {
-	    redo = true;
-	    players[i].reset();
-	}
-    }
-    if (redo) {
-	redrawGame();
-    }
-}
-
-function checkSidesResize() {
     var redo = false;
-    var lx,ly,ux,uy;
-    lx = track.grid.lx;
-    ly = track.grid.ly;
-    ux = track.grid.ux;
-    uy = track.grid.uy;
     for (var i = 0; i < players.length; i++) {
-	if (players[i].getX() < lx) {
+	if (track.checkSides(players[i])) {
 	    redo = true;
-	    lx = players[i].getX();
-	}
-	if (players[i].getX() > ux) {
-	    redo = true;
-	    ux = players[i].getX();
-	}
-	if (players[i].getY() < ly) {
-	    redo = true;
-	    ly = players[i].getY();
-	}
-	if (players[i].getY() > uy) {
-	    redo = true;
-	    uy = players[i].getY();
 	}
     }
     if (redo) {
-	track.grid.lx = lx;
-	track.grid.ly = ly;
-	track.grid.ux = ux;
-	track.grid.uy = uy;
-	var w = Math.ceil((ux - lx + 1) * sqsize);
-	var h = Math.ceil((uy - ly + 1) * sqsize);
+	var w = Math.ceil((track.getWidth() + 1) * sqsize);
+	var h = Math.ceil((track.getHeight() + 1) * sqsize);
 	cvs.width = w;
 	cvs.height = h;
 	redrawGame();
     }
-}
-
-function transformCoordinates(x,y) {
-    var h = cvs.height;
-    if (x.x !== undefined) {
-	y = x.y;
-	x = x.x;
-    }
-    return {x: (x - track.grid.lx + .5)*sqsize, y: h - (y - track.grid.ly + .5)*sqsize }
 }
 
 function domousedown(e) {
@@ -653,25 +536,9 @@ function domouseup(e) {
     if (state == 0) {
 	if (movingPlayer === null) {
 	    var c = getRelativeCoords(e);
-	    var w = track.grid.ux;
-	    var h = track.grid.uy;
-	    var x = Math.floor(c.x/sqsize);
-	    var y = h - Math.floor(c.y/sqsize);
-	    var found = false;
-	    for (var k = 0; k < track.markers.length; k++) {
-		if ((track.markers[k].x == x) && (track.markers[k].y == y)) {
-		    if (track.markers[k].inside == true) {
-			track.markers[k].inside = false;
-		    } else {
-			track.markers.splice(k,1);
-		    }
-		    found = true;
-		    break;
-		}
-	    }
-	    if (!found) {
-		track.markers.push({x: x, y: y, inside: true});
-	    }
+	    c.x /= sqsize;
+	    c.y /= sqsize;
+	    track.modifyMarker(c);
 	}
 	drawGame();
     }
@@ -686,10 +553,8 @@ function domousemove(e) {
     if (state == 0) {
 	if (movingPlayer !== null) {
 	    var c = getRelativeCoords(e);
-	    var w = track.grid.ux;
-	    var h = track.grid.uy;
 	    var x = Math.floor(c.x/sqsize);
-	    var y = h - Math.floor(c.y/sqsize);
+	    var y = track.getTop() - Math.floor(c.y/sqsize);
 	    players[movingPlayer].setPosition({x: x, y: y});
 	    drawGame();
 	}
@@ -705,14 +570,6 @@ function domousemove(e) {
     }
 }
 
-function getRelativeCoords(event) {
-    if (event.offsetX !== undefined && event.offsetY !== undefined) { return { x: event.offsetX, y: event.offsetY }; }
-    return { x: event.layerX, y: event.layerY };
-}
-
-
-window.addEventListener('load',init,false);
-
 function clear(c) {
     var w = c.canvas.width;
     var h = c.canvas.height;
@@ -722,130 +579,65 @@ function clear(c) {
     c.restore();
 }
 
-var Player = function(v,c,bg,n) {
-    this.velocity = {x: 0, y: 0};
-    this.position = {x: v.x, y: v.y};
-    this.original = {x: v.x, y: v.y};
-    this.path = [{x: v.x, y: v.y}];
-    this.colour = c;
-    this.bgcolour = bg;
-    this.name = n;
-    this.acceleration = null;
+function showControls(n) {
+    var ids = ["setup", "define", "acceleration"];
+    var elt;
+    for (var i = 0; i < ids.length; i++) {
+	elt = document.getElementById(ids[i]);
+	if (i == n) {
+	    elt.style.display = "block";
+	} else {
+	    elt.style.display = "none";
+	}
+    }
 }
 
-Player.prototype.setPosition = function(v) {
-    this.position = {x: v.x, y: v.y};
-    this.original = {x: v.x, y: v.y};
-    this.path = [{x: v.x, y: v.y}];
+function getRelativeCoords(event) {
+    if (event.offsetX !== undefined && event.offsetY !== undefined) { return { x: event.offsetX, y: event.offsetY }; }
+    return { x: event.layerX, y: event.layerY };
 }
 
-Player.prototype.reset = function() {
-    this.velocity = {x: 0, y: 0};
-    this.position = {x: this.original.x, y: this.original.y};
-    this.path = [{x: this.original.x, y: this.original.y}];
-    this.acceleration = null;
-}
-
-Player.prototype.setAcceleration = function(x,y) {
-    this.acceleration = {x: x, y: y};
-}
-
-Player.prototype.update = function() {
-    this.velocity.x += this.acceleration.x;
-    this.velocity.y += this.acceleration.y;
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-    this.path.push({x: this.position.x, y: this.position.y});
-    this.acceleration = null;
-}
-
-Player.prototype.isReady = function() {
-    if (this.acceleration) {
-	return true;
+function hsl(h,s,l) {
+    h = (h - Math.floor(h))*6;
+    var c = (1 - Math.abs(2*l-1))*s*255;
+    var m = l*255 - c/2;
+    var x = c*(1 - Math.abs(h%2 - 1));
+    var r,g,b;
+    if (h < 1) {
+	r = c + m;
+	g = x + m;
+	b = m;
+    } else if (h < 2) {
+	r = x + m;
+	g = c + m;
+	b = m;
+    } else if (h < 3) {
+	r = m;
+	g = c + m;
+	b = x + m;
+    } else if (h < 4) {
+	r = m;
+	g = x + m;
+	b = c + m;
+    } else if (h < 5) {
+	r = x + m;
+	g = m;
+	b = c + m;
     } else {
-	return false;
+	r = c + m;
+	g = m;
+	b = x + m;
     }
+    var s = 'rgb(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ')';
+    return s;
 }
 
-Player.prototype.getX = function() {
-    return this.position.x;
-}
-
-Player.prototype.getY = function() {
-    return this.position.y;
-}
-
-Player.prototype.getVelocityX = function() {
-    return this.velocity.x;
-}
-
-Player.prototype.getVelocityY = function() {
-    return this.velocity.y;
-}
-
-Player.prototype.getPath = function() {
-    return this.path;
-}
-
-Player.prototype.getName = function() {
-    return this.name;
-}
-
-Player.prototype.getBgColour = function() {
-    return this.bgcolour;
-}
-
-Player.prototype.drawCar = function() {
-    ctx.save();
-    var c;
-    if (this.path.length > 1) {
-	var c = transformCoordinates(this.path[this.path.length-2]);
-	ctx.fillStyle = this.bgcolour;
-	ctx.beginPath();
-	ctx.moveTo(c.x,c.y);
-	ctx.arc(c.x,c.y,ptsize*sqsize,0,2*Math.PI);
-	ctx.fill();
+function transformCoordinates(x,y) {
+    var h = cvs.height;
+    if (x.x !== undefined) {
+	y = x.y;
+	x = x.x;
     }
-    var c = transformCoordinates(this.position);
-    ctx.fillStyle = this.colour;
-    ctx.beginPath();
-    ctx.moveTo(c.x,c.y);
-    ctx.arc(c.x,c.y,ptsize*sqsize,0,2*Math.PI);
-    ctx.fill();
-    ctx.restore();
+    return {x: (x - track.getLeft() + .5)*sqsize, y: h - (y - track.getBottom() + .5)*sqsize }
 }
 
-Player.prototype.drawTrajectory = function() {
-    ctx.save();
-    var c = transformCoordinates(this.position);
-    var p = transformCoordinates(this.path[this.path.length - 2]);
-    ctx.strokeStyle = this.colour;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(p.x,p.y);
-    ctx.lineTo(c.x,c.y);
-    ctx.stroke();
-    this.drawCar();
-    ctx.restore();
-}
-
-Player.prototype.redraw = function() {
-    var p = transformCoordinates(this.path[0]);
-    ctx.strokeStyle = this.colour;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(p.x,p.y);
-    for (var i = 1; i < this.path.length; i++) {
-	p = transformCoordinates(this.path[i]);
-	ctx.lineTo(p.x,p.y);
-    }
-    ctx.stroke();
-    ctx.fillStyle = this.colour;
-    ctx.beginPath();
-    for (var i = 0; i < this.path.length; i++) {
-	p = transformCoordinates(this.path[i]);
-	ctx.moveTo(p.x,p.y);
-	ctx.arc(p.x,p.y,ptsize*sqsize,0,2*Math.PI);
-    }
-    ctx.fill();
-}

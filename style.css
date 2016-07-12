@@ -4,15 +4,13 @@ body {
 #track {
     overflow: hidden;
     position: relative;
-    display: none;
 }
 
 #cvs {
     position: absolute; 
 }
 
-#define {
-    display: none;
+.configure {
     position: fixed;
     right: 0px;
     top: 0px;
@@ -21,6 +19,11 @@ body {
     padding: 5px;
     background: #ccc;
     padding-right: 15px;
+    width: 18em;
+}
+
+#define {
+    display: none;
 }
 
 #acceltbl {
@@ -89,4 +92,8 @@ body {
     font-size: 100%;
     margin-top: 1em;
     margin-left: auto;
+}
+
+#trackdef {
+    display: none;
 }
