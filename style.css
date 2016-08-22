@@ -57,6 +57,7 @@ body {
 }
 
 .accelerate {
+    border-color: white;
     border-style: outset;
 }
 

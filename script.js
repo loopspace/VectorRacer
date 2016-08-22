@@ -15,6 +15,25 @@ var state = 0;
 
 var tracks = [
     new Track({
+	name: 'Free For All',
+	description: 'Just move around the grid',
+	grid: {
+	    lx: 0,
+	    ux: 20,
+	    ly: 0,
+	    uy: 20,
+	},
+	fixed: false,
+	winner: function(p) {
+	    return false;
+	},
+	starts: function(i,n) {
+	    return {x: 15 - n - 3 + i, y: 0}
+	},
+	markers: [],
+	modifiable: false
+    }),
+    new Track({
 	name: 'First Past the Post',
 	description: 'Be the first to get over the finish line',
 	grid: {
@@ -322,10 +341,13 @@ function clickSquare(e) {
 	return;
     }
     var tds = e.currentTarget.parentNode.parentNode.querySelectorAll('.accelerate');
+    var bgcol = players[e.currentTarget.dataset.player].getBgColour();
     for (var i = 0; i < tds.length; i++) {
 	tds[i].style.borderStyle = 'outset';
+	tds[i].style.backgroundColor = bgcol;
     }
     e.currentTarget.style.borderStyle = 'inset';
+    e.currentTarget.style.backgroundColor = 'white';
     players[e.currentTarget.dataset.player].setAcceleration(parseInt(e.currentTarget.dataset.x),parseInt(e.currentTarget.dataset.y));
     var ready = true;
     for (var i = 0; i < players.length; i++) {
@@ -349,6 +371,10 @@ function takeTurn() {
     var acc = document.getElementById("acceleration");
     var tds = acc.querySelectorAll('.accelerate');
     for (var i = 0; i < tds.length; i++) {
+	if (!tds[i].dataset.player) {
+	    break;
+	}
+	tds[i].style.backgroundColor = players[tds[i].dataset.player].getBgColour();
 	tds[i].style.borderStyle = 'outset';
     }
     var tbtn = document.getElementById('turnbtn');
@@ -468,8 +494,14 @@ function clearMessage() {
 function resetGame() {
     for (var i = 0; i < players.length; i++) {
 	players[i].reset();
+	console.log(players[i].position);
     }
-    drawGame();
+    track.reset();
+    var w = Math.ceil((track.getWidth() + 1) * sqsize);
+    var h = Math.ceil((track.getHeight() + 1) * sqsize);
+    cvs.width = w;
+    cvs.height = h;
+    redrawGame();
     state = 1;
 }
 

@@ -1,7 +1,15 @@
 Track = function(p) {
+    this.setParams(p);
+}
+
+Track.prototype.setParams = function(p) {
     this.name = p.name;
     this.description = p.description;
-    this.grid = p.grid;
+    this.grid = {};
+    this.grid.lx = p.grid.lx;
+    this.grid.ux = p.grid.ux;
+    this.grid.ly = p.grid.ly;
+    this.grid.uy = p.grid.uy;
     this.fixed = p.fixed;
     this.starts = p.starts;
     this.markers = p.markers;
@@ -10,6 +18,12 @@ Track = function(p) {
     if (p.winner) {
 	this.winner = p.winner;
     }
+    this.initialParams = p;
+}
+
+Track.prototype.reset = function() {
+    this.setParams(this.initialParams);
+    console.log(this.grid);
 }
 
 Track.prototype.getWidth = function() {
@@ -203,9 +217,10 @@ Track.prototype.checkSides = function(p) {
 	    return true;
 	} else {
 	    this.grid.ux = Math.max(this.grid.ux, p.getX());
-	    this.grid.lx = Math.max(this.grid.lx, p.getX());
+	    this.grid.lx = Math.min(this.grid.lx, p.getX());
 	    this.grid.uy = Math.max(this.grid.uy, p.getY());
-	    this.grid.ly = Math.max(this.grid.ly, p.getY());
+	    this.grid.ly = Math.min(this.grid.ly, p.getY());
+	    return true;
 	}
     }
 }
