@@ -494,7 +494,6 @@ function clearMessage() {
 function resetGame() {
     for (var i = 0; i < players.length; i++) {
 	players[i].reset();
-	console.log(players[i].position);
     }
     track.reset();
     var w = Math.ceil((track.getWidth() + 1) * sqsize);

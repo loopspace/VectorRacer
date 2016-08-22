@@ -23,7 +23,6 @@ Track.prototype.setParams = function(p) {
 
 Track.prototype.reset = function() {
     this.setParams(this.initialParams);
-    console.log(this.grid);
 }
 
 Track.prototype.getWidth = function() {
