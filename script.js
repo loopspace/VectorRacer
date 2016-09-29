@@ -58,7 +58,7 @@ var tracks = [
     }),
     new Track({
 	name: 'Rest at the Last',
-	description: 'Get to the finish line and stop there',
+	description: 'Get to the finish line and wait there for a turn',
 	grid: {
 	    lx: 0,
 	    ux: 20,
@@ -67,7 +67,13 @@ var tracks = [
 	},
 	fixed: true,
 	winner: function(p) {
-	    if (p.getY() == 10 && p.getVelocityX() == 0 && p.getVelocityY() == 0) {
+	    var pt = p.getPath();
+	    if (pt.length < 2) {
+		return false;
+	    }
+	    var x = pt[pt.length-2].x;
+	    var y = pt[pt.length-2].y
+	    if (p.getY() == 10 && y == 10 && x == p.getX() ) {
 		return true;
 	    } else {
 		return false;
@@ -122,7 +128,7 @@ var tracks = [
     }),
     new Track({
 	name: 'Stop on a dime',
-	description: 'Get to the target and stop there',
+	description: 'Get to the target and wait there for a turn',
 	grid: {
 	    lx: 0,
 	    ux: 20,
@@ -136,7 +142,13 @@ var tracks = [
 	laps: 1,
 	markers: [{x: 3, y: 17, inside: true}],
 	winner: function(p) {
-	    if (p.getX() == 3 && p.getY() == 17 && p.getVelocityX() == 0 && p.getVelocityY() == 0) {
+	    var pt = p.getPath();
+	    if (pt.length < 2) {
+		return false;
+	    }
+	    var x = pt[pt.length-2].x;
+	    var y = pt[pt.length-2].y
+	    if (p.getX() == 3 && p.getY() == 17 && y == 17 && x == 3 ) {
 		return true;
 	    } else {
 		return false;
