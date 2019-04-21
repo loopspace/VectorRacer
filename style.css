@@ -1,4 +1,8 @@
 body {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
 #track {
@@ -97,4 +101,10 @@ body {
 
 #trackdef {
     display: none;
+}
+
+#gameTitle {
+    text-align: center;
+    font-size: 130%;
+    font-weight: bold;
 }
